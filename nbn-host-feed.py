@@ -73,8 +73,8 @@ bucket='nldn.wiki'
 
 s3 = boto3.client(
     's3',
-    aws_access_key_id='AKIAQIGZPNQMSSHKLDME',
-    aws_secret_access_key='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'
+    aws_access_key_id='',
+    aws_secret_access_key=''
 )
 
 s3.upload_file(file_name, bucket, file_name, ExtraArgs={'ContentType': 'application/rss+xml'})
