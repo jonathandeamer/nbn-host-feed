@@ -6,6 +6,7 @@ import boto3
 import os
 import json
 
+os.environ["AWS_CONFIG_FILE"] = "config"
 
 # Set up feed
 nbn_host_profile = 'https://newbooksnetwork.com/hosts/profile/112f8337-847b-411d-b237-0171df1fb217'
