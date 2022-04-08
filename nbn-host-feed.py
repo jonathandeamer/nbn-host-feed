@@ -9,10 +9,10 @@ import json
 
 # Set up feed
 nbn_host_profile = 'https://newbooksnetwork.com/hosts/profile/112f8337-847b-411d-b237-0171df1fb217'
-feed_url='https://s3.eu-west-2.amazonaws.com/nldn.wiki/miranda.xml'
+feed_url='https://nbn-host-feed.s3.eu-west-2.amazonaws.com/miranda.xml'
 fg = FeedGenerator()
 fg.title('Miranda Melcher on New Books Network')
-fg.logo('https://s3.eu-west-2.amazonaws.com/nldn.wiki/miranda-nbn.png')
+fg.logo('https://nbn-host-feed.s3.eu-west-2.amazonaws.com/miranda-nbn.png')
 fg.author( name='Miranda Melcher')
 fg.contributor( name='Miranda Melcher')
 fg.description(description='Miranda\'s interviews with authors from across New Books Network channels.')
@@ -40,7 +40,7 @@ for each in episode_links:
 	fe.guid(each,permalink=True)
 	fe.link(href=each,rel='alternate')
 	fe.link(href=feed_url,rel='self')
-	fe.author( name='Miranda Melcher')
+	fe.author(name='Miranda Melcher')
 	fe.contributor( name='Miranda Melcher')
 	page = requests.get(each)
 	soup = BeautifulSoup(page.text, 'html.parser')
@@ -69,7 +69,7 @@ fg.rss_file('miranda.xml') # Write the RSS feed to a file
 # Send file to S3
 
 file_name=os.path.basename('miranda.xml')
-bucket='nldn.wiki'
+bucket='nbn-host-feed'
 
 s3 = boto3.client(
     's3',
