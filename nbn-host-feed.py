@@ -71,10 +71,6 @@ fg.rss_file('miranda.xml') # Write the RSS feed to a file
 file_name=os.path.basename('miranda.xml')
 bucket='nbn-host-feed'
 
-s3 = boto3.client(
-    's3',
-    aws_access_key_id='',
-    aws_secret_access_key=''
-)
+s3 = boto3.client('s3')
 
 s3.upload_file(file_name, bucket, file_name, ExtraArgs={'ContentType': 'application/rss+xml'})
