@@ -6,7 +6,7 @@ import boto3
 import os
 import json
 
-os.environ["AWS_CONFIG_FILE"] = "config"
+os.environ["AWS_CONFIG_FILE"] = "/home/private/nbn-host-feed/config"
 
 # Set up feed
 nbn_host_profile = 'https://newbooksnetwork.com/hosts/profile/112f8337-847b-411d-b237-0171df1fb217'
@@ -70,7 +70,7 @@ fg.rss_file('miranda.xml') # Write the RSS feed to a file
 
 # Send file to S3
 
-file_name=os.path.basename('miranda.xml')
+file_name=os.path.basename('/home/private/nbn-host-feed/miranda.xml')
 bucket='nbn-host-feed'
 
 s3 = boto3.client('s3')
