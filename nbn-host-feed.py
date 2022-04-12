@@ -65,7 +65,7 @@ for each in episode_links:
 
 
 rssfeed  = fg.rss_str(pretty=True) # Get the RSS feed as string
-fg.rss_file('miranda.xml') # Write the RSS feed to a file
+fg.rss_file('/home/private/nbn-host-feed/miranda.xml') # Write the RSS feed to a file
 
 
 # Send file to S3
