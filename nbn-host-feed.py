@@ -70,9 +70,10 @@ fg.rss_file('/home/private/nbn-host-feed/miranda.xml') # Write the RSS feed to a
 
 # Send file to S3
 
-file_name=os.path.basename('/home/private/nbn-host-feed/miranda.xml')
+file_name='/home/private/nbn-host-feed/miranda.xml'
+object_name=os.path.basename('/home/private/nbn-host-feed/miranda.xml')
 bucket='nbn-host-feed'
 
 s3 = boto3.client('s3')
 
-s3.upload_file(file_name, bucket, file_name, ExtraArgs={'ContentType': 'application/rss+xml'})
+s3.upload_file(file_name, bucket, object_name, ExtraArgs={'ContentType': 'application/rss+xml'})
