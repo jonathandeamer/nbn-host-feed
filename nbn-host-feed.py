@@ -44,11 +44,14 @@ for each in episode_links:
 	fe.link(href=feed_url,rel='self')
 	fe.author(name='Miranda Melcher')
 	fe.contributor( name='Miranda Melcher')
+	print(each)
 	page = requests.get(each)
 	soup = BeautifulSoup(page.text, 'html.parser')
 	iframes = soup.find_all('iframe')
 	megaphone_url = iframes[1].get('src')
-	megaphone_id = re.search('(NBN)\d+', megaphone_url)
+	print(megaphone_url)
+	megaphone_id = re.search('([A-Z])\w+', megaphone_url)
+	print(megaphone_id)
 	mp3_url = 'https://dcs.megaphone.fm/' + megaphone_id.group() + '.mp3'
 	fe.enclosure(url=mp3_url,type='audio/mpeg') # set podcast audio url
 	book_title = soup.find('h1')
