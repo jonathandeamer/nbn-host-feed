@@ -134,9 +134,7 @@ with requests.Session() as s:
 
 # Get the RSS feed as a string and write it to an XML file
 rssfeed = fg.rss_str(pretty=True)
-fg.rss_file('miranda.xml')
-
-#fg.rss_file('/home/private/nbn-host-feed/miranda.xml')
+fg.rss_file('/home/private/nbn-host-feed/miranda.xml')
 
 # Prepare to upload the XML file to S3
 file_name = '/home/private/nbn-host-feed/miranda.xml'
