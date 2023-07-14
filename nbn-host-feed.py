@@ -11,7 +11,7 @@ import feedparser
 os.environ["AWS_CONFIG_FILE"] = "/home/private/nbn-host-feed/config"
 
 # Initialize RSS feed settings
-nbn_host_profile = 'https://newbooksnetwork.com/hosts/profile/112f8337-847b-411d-b237-0171df1fb217'
+nbn_host_profile = 'https://newbooksnetwork.com/hosts/profile/112f8337-847b-411d-b237-0171df1fb217' #'https://nbn-host-feed.s3.eu-west-2.amazonaws.com/allbooks14jul23.html'
 feed_url='https://nbn-host-feed.s3.eu-west-2.amazonaws.com/miranda.xml'
 
 # Parse the existing feed
@@ -35,7 +35,7 @@ fg.link(href=feed_url, rel='self')
 fg.link(href=nbn_host_profile, rel='alternate')
 fg.language('en')
 fg.load_extension('base')
-
+all_ids=[]
 
 # Add historic entries from existing feed, as these may not be available on the profile page
 for entry in existing_entries:
@@ -44,11 +44,13 @@ for entry in existing_entries:
 
     # Set the details of the entry
     fe.id(entry.id)
+    all_ids.append(entry.id)
     fe.guid(entry.id, permalink=True)
     fe.link({'href': entry.link, 'rel': 'alternate'})
     fe.author(name='Miranda Melcher')
     fe.contributor(name='Miranda Melcher')
     fe.description(description=entry.description)
+    fe.title(entry.title)
     fe.content(content=entry.description, type='text/html')
     fe.published(entry.published)
 
@@ -75,48 +77,60 @@ with requests.Session() as s:
 
         # For each episode URL (in reverse order), fetch the episode details and add an entry to the feed
         for each in reversed(episode_links):
-            # Initialize a new feed entry
-            fe = fg.add_entry()
-            fe.id(each)
-            fe.guid(each, permalink=True)
-            fe.link(href=each, rel='alternate')
-            fe.author(name='Miranda Melcher')
-            fe.contributor(name='Miranda Melcher')
-            print(each)
-            # Get the episode page
-            page = s.get(each, timeout=5)
-            if page.status_code != 200:
-                print(f"Failed to get page: {each}")
-                continue
-            try:
-                # Parse the HTML of the episode page
-                soup = BeautifulSoup(page.text, 'lxml')
-            except Exception as e:
-                print(f"Failed to parse page: {each}. Error: {str(e)}")
-                continue
+            if each not in all_ids:
+                # Initialize a new feed entry
+                fe = fg.add_entry()
+                
+                fe.id(each)
+                fe.guid(each, permalink=True)
+                fe.link(href=each, rel='alternate')
+                fe.author(name='Miranda Melcher')
+                fe.contributor(name='Miranda Melcher')
+                print(each)
+                # Get the episode page
+                page = s.get(each, timeout=5)
+                if page.status_code != 200:
+                    print(f"Failed to get page: {each}")
+                    continue
+                try:
+                    # Parse the HTML of the episode page
+                    soup = BeautifulSoup(page.text, 'lxml')
+                except Exception as e:
+                    print(f"Failed to parse page: {each}. Error: {str(e)}")
+                    continue
 
-            # Extract the necessary details from the episode page
-            iframes = soup.find_all('iframe')
-            megaphone_url = iframes[1].get('src')
-            print(megaphone_url)
-            megaphone_id = re.search('([A-Z])\w+', megaphone_url)
-            print(megaphone_id)
-            mp3_url = 'https://dcs.megaphone.fm/' + megaphone_id.group() + '.mp3'
-            # Set the podcast audio URL
-            fe.enclosure(url=mp3_url, type='audio/mpeg')
-            book_title = soup.find('h1')
-            book_author = soup.find('h4')
-            # Set the episode title
-            fe.title(book_title.string + ' (' + book_author.string + ')')
-            description = soup.find('div', class_='episode')
-            # Set the episode description and content
-            fe.description(description=str(description), isSummary=True)
-            fe.content(content=str(description), type='text/html')
+                # Extract the necessary details from the episode page
+                iframes = soup.find_all('iframe')
+                megaphone_url = iframes[1].get('src')
+                print(megaphone_url)
+                megaphone_id = re.search('([A-Z])\w+', megaphone_url)
+                print(megaphone_id)
+                mp3_url = 'https://dcs.megaphone.fm/' + megaphone_id.group() + '.mp3'
+                # Set the podcast audio URL
+                fe.enclosure(url=mp3_url, type='audio/mpeg')
+                book_title = soup.find('h1')
+                book_subtitle = soup.find('h2')
+                book_publisher = soup.find('h3')
+                book_author = soup.find('h4')
+                # Set the episode title
+                episode_title = book_title.string
+                if book_subtitle.string is not None:
+                    episode_title = '"' + episode_title + ': ' + book_subtitle.string + '"' 
+                else:
+                    episode_title = '"' + episode_title + '"'
+                if book_author.string is not None:
+                    episode_title = episode_title + ' by ' + book_author.string
+                fe.title(episode_title)
+                #fe.title(book_title.string + ' (' + book_author.string + ')')
+                description = soup.find('div', class_='episode')
+                # Set the episode description and content
+                fe.description(description=str(description), isSummary=True)
+                fe.content(content=str(description), type='text/html')
 
-            # Extract the publication date from the script tags
-            script_tags = soup.find_all('script')
-            pub_date_container = json.loads(script_tags[3].string)
-            fe.published(pub_date_container['@graph'][0]['datePublished'])
+                # Extract the publication date from the script tags
+                script_tags = soup.find_all('script')
+                pub_date_container = json.loads(script_tags[3].string)
+                fe.published(pub_date_container['@graph'][0]['datePublished'])
 
 # Get the RSS feed as a string and write it to an XML file
 rssfeed = fg.rss_str(pretty=True)
