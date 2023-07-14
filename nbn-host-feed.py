@@ -11,7 +11,7 @@ import feedparser
 os.environ["AWS_CONFIG_FILE"] = "/home/private/nbn-host-feed/config"
 
 # Initialize RSS feed settings
-nbn_host_profile = 'https://newbooksnetwork.com/hosts/profile/112f8337-847b-411d-b237-0171df1fb217' #'https://nbn-host-feed.s3.eu-west-2.amazonaws.com/allbooks14jul23.html'
+nbn_host_profile ='https://newbooksnetwork.com/hosts/profile/112f8337-847b-411d-b237-0171df1fb217' # 'https://nbn-host-feed.s3.eu-west-2.amazonaws.com/allbooks14jul23.html' 
 feed_url='https://nbn-host-feed.s3.eu-west-2.amazonaws.com/miranda.xml'
 
 # Parse the existing feed
@@ -25,7 +25,7 @@ fg = FeedGenerator()
 
 # Set properties for the feed
 fg.title('Miranda Melcher on New Books Network')
-fg.logo('https://nbn-host-feed.s3.eu-west-2.amazonaws.com/miranda-nbn.png')
+fg.logo('https://nbn-host-feed.s3.eu-west-2.amazonaws.com/miranda-nbn.jpg')
 fg.author(name='Miranda Melcher')
 fg.contributor(name='Miranda Melcher')
 fg.description(description='Miranda\'s interviews with authors from across New Books Network channels.')
@@ -53,6 +53,7 @@ for entry in existing_entries:
     fe.title(entry.title)
     fe.content(content=entry.description, type='text/html')
     fe.published(entry.published)
+    fe.enclosure(url=entry.enclosures[0].href, type='audio/mpeg')
 
 # Start a requests session for persistent HTTP connections
 with requests.Session() as s:
@@ -135,6 +136,7 @@ with requests.Session() as s:
 # Get the RSS feed as a string and write it to an XML file
 rssfeed = fg.rss_str(pretty=True)
 fg.rss_file('/home/private/nbn-host-feed/miranda.xml')
+#fg.rss_file('miranda.xml')
 
 # Prepare to upload the XML file to S3
 file_name = '/home/private/nbn-host-feed/miranda.xml'
